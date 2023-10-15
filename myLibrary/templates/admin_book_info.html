@@ -1,0 +1,157 @@
+<!--
+该页面功能：显示emoji信息，统计过去7天的使用人数和发送数量
+TODO:
+    1. 之前的变量类型是book，如果觉得命名不方便可以在后端里面改(方法：views.py里面ctrl+f搜admin_book_info.html)，前端也适配就可以
+    2. 导出数据那里，之前的逻辑是一个文件夹里有文件，然后查询这个文件夹，返回变量，有的话就显示，实时导出的话可能要改一下获取文件的过程（在前后端对接的部分）
+    3. 和后端对接时，需要改urls.py和views.py里面对应的接口
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="../../../static/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="../../../static/css/dashboard.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <script src="../../../static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../../../static/zico/JS/zico.min.js"></script>
+    <title> emoji状态查询 </title>
+</head>
+<body>
+<nav class="navbar navbar-dark sticky-top flex-md-nowrap p-0 shadow" style="background-color: #29abff;">
+    <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="/admin_index/"
+       style="font-weight: bold;font-size: x-large;">emoji管理系统</a>
+    <span style="font-size: medium; color: #ffffff; margin-top: 0px; font-weight: bold;font-size: large;">emoji详情页面</span>
+    <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+            <a class="nav-link" href="/logout_view/" style="font-weight: bold;color: #ffffff">退出登录</a>
+        </li>
+    </ul>
+</nav>
+<div class="container-fluid">
+    <div class="row">
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="sidebar-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_index/">
+                            <i class="zi zi_service"></i>
+                            <span>管理员主界面</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_query/">
+                            <i class="zi zi_search"></i>
+                            <span>emoji状态查询</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_borrow/">
+                            <i class="zi zi_squareDown"></i>
+                            <span>用户状态查询</span>
+                        </a>
+                    </li>
+                        <!--
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_return/">
+                            <i class="zi zi_squareUp"></i>
+                            <span>还书</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_upload/">
+                            <i class="zi zi_squarePlus"></i>
+                            <span>入库</span>
+                        </a>
+                    </li>
+            -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_takeoff/">
+                            <i class="zi zi_squareLess"></i>
+                            <span>用户注销</span>
+                        </a>
+                    </li>
+                <!--
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_pay/">
+                            <i class="zi zi_yensign"></i>
+                            <span>为读者缴费/扣费</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_recommend/">
+                            <i class="zi zi_bell"></i>
+                            <span>处理读者荐购</span>
+                        </a>
+                    </li>
+                    -->
+                </ul>
+            </div>
+        </nav>
+    </div>
+</div>
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+    <!--展示图书信息的代码-->
+
+    {% block content %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>{{ book.book_name }}</h2>
+            <hr>
+            {% csrf_token %}
+            {% if book.image %}
+            {% load static %}
+            <!--<img src="../../../media/{{ book.image }}" alt="{{ book.book_name }}的图片">-->
+
+            <img src="{% static book.image %}" alt="图片" style="max-height:200px; max-width:200px;">
+
+            {% else %}
+            <br>
+            <div class="alert alert-warning max-w-50" role="alert">
+                <strong>注意!</strong> 该emoji暂无图片
+            </div>
+            {% endif %}
+            <p><strong>emoji编号:</strong> {{ book.isbn }}</p>
+            <p><strong>名称:</strong> {{ book.author }}</p>
+            <p><strong>过去7天使用人数:</strong> {{ book.last7days_users }}</p>
+            <p><strong>过去7天发送次数:</strong> {{ book.last7days_count }}</p>
+            {% if book.pdf %}
+            {% load static %}
+            <a href="{% static book.pdf %}" class="btn btn-primary">导出历史数据</a>
+            {% else %}
+            <br><br>
+            <div class = "alert alert-warning" role = "alert">
+                <strong>注意!</strong> 该emoji暂无历史数据
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    {% endblock %}
+    <!--views.py里对应的函数（参考）
+    不在html里调用，在urls.py里调用
+    from django.shortcuts import render, get_object_or_404
+    from .models import Book
+
+    def book_detail(request, isbn):
+        book = get_object_or_404(Book, isbn=isbn)
+        return render(request, 'reader_book_info.html', {'book': book})
+    -->
+
+</main>
+
+</body>
+</html>
+<style>
+    body {
+        background-image: url("../../../static/img/background-o.jpg");
+        background-size: cover;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+</style>
